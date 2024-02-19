@@ -1,3 +1,70 @@
+# How to run
+wget -qO- https://github.com/nextflow-io/nextflow/releases/download/v22.10.4/nextflow | bash
+./nextflow run nanocompore.nf
+
+python3 compress_fast5.py --input_path experiment20231117_no_modification/fast5_vbz --save_path experiment20231117_no_modification/fast5 --compression gzip --recursive --threads 4
+python3 compress_fast5.py --input_path experiment20231120_ncm5SU_long/fast5_vbz --save_path experiment20231120_ncm5SU_long/fast5 --compression gzip --recursive --threads 4
+
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/genomics_tools:1.0.1 samtools faidx unmodified_all_all_all_rna_sequences_LYS.fasta
+
+==============================================
+====== experiment20231117_no_modification ====
+==============================================
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'minimap2 -x map-ont -t 4 -a unmodified_all_all_all_rna_sequences_LYS.fasta experiment20231117_no_modification/guppy/pass/*.fastq > experiment20231117_no_modification/minimap.sam'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'samtools view experiment20231117_no_modification/minimap.sam -bh -t unmodified_all_all_all_rna_sequences_LYS.fasta.fai -F 2324 | samtools sort -@ 4 -o experiment20231117_no_modification/minimap.filt.sort.bam'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'samtools index experiment20231117_no_modification/minimap.filt.sort.bam experiment20231117_no_modification/minimap.filt.sort.bam.bai'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'cat experiment20231117_no_modification/guppy/pass/*.fastq > experiment20231117_no_modification/basecalled.fastq'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'f5c index -t 4 -d experiment20231117_no_modification/fast5 experiment20231117_no_modification/basecalled.fastq'
+####docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'f5c eventalign -t 4 -r experiment20231117_no_modification/basecalled.fastq -b experiment20231117_no_modification/minimap.filt.sort.bam -g unmodified_all_all_all_rna_sequences_LYS.fasta --samples --print-read-names --scale-events --rna --disable-cuda=yes --min-mapq 0 | nanocompore eventalign_collapse -t 4 -o eventalign_collapse --log_level debug'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data wkusmirek/f5c:1.4 bash -c '/f5c/f5c eventalign -t 4 -r experiment20231117_no_modification/basecalled.fastq -b experiment20231117_no_modification/minimap.filt.sort.bam -g unmodified_all_all_all_rna_sequences_LYS.fasta --samples --print-read-names --scale-events --rna --min-mapq 0 --min-recalib-events 5 -o experiment20231117_no_modification/eventalign.sam'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'nanocompore eventalign_collapse -t 4 --eventalign experiment20231117_no_modification/eventalign.sam -o experiment20231117_no_modification/eventalign_collapse --log_level debug'
+
+==============================================
+====== experiment20231120_ncm5SU_long =======
+==============================================
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'minimap2 -x map-ont -t 4 -a unmodified_all_all_all_rna_sequences_LYS.fasta experiment20231120_ncm5SU_long/guppy/pass/*.fastq > experiment20231120_ncm5SU_long/minimap.sam'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'samtools view experiment20231120_ncm5SU_long/minimap.sam -bh -t unmodified_all_all_all_rna_sequences_LYS.fasta.fai -F 2324 | samtools sort -@ 4 -o experiment20231120_ncm5SU_long/minimap.filt.sort.bam'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'samtools index experiment20231120_ncm5SU_long/minimap.filt.sort.bam experiment20231120_ncm5SU_long/minimap.filt.sort.bam.bai'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'cat experiment20231120_ncm5SU_long/guppy/pass/*.fastq > experiment20231120_ncm5SU_long/basecalled.fastq'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'f5c index -t 4 -d experiment20231120_ncm5SU_long/fast5 experiment20231120_ncm5SU_long/basecalled.fastq'
+####docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'f5c eventalign -t 4 -r experiment20231120_ncm5SU_long/basecalled.fastq -b experiment20231120_ncm5SU_long/minimap.filt.sort.bam -g unmodified_all_all_all_rna_sequences_LYS.fasta --samples --print-read-names --scale-events --rna --disable-cuda=yes --min-mapq 0 | nanocompore eventalign_collapse -t 4 -o eventalign_collapse --log_level debug'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data wkusmirek/f5c:1.4 bash -c '/f5c/f5c eventalign -t 4 -r experiment20231120_ncm5SU_long/basecalled.fastq -b experiment20231120_ncm5SU_long/minimap.filt.sort.bam -g unmodified_all_all_all_rna_sequences_LYS.fasta --samples --print-read-names --scale-events --rna --min-mapq 0 --min-recalib-events 5 -o experiment20231120_ncm5SU_long/eventalign.sam'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'nanocompore eventalign_collapse -t 4 --eventalign experiment20231120_ncm5SU_long/eventalign.sam -o experiment20231120_ncm5SU_long/eventalign_collapse --log_level debug'
+
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 bash -c 'nanocompore sampcomp --file_list1 experiment20231117_no_modification/eventalign_collapse/out_eventalign_collapse.tsv --file_list2 experiment20231120_ncm5SU_long/eventalign_collapse/out_eventalign_collapse.tsv --label1 Control --label2 Dataset --fasta unmodified_all_all_all_rna_sequences_LYS.fasta --outpath nanocompore_result --sequence_context 2 --downsample_high_coverage 5000 --allow_warnings --pvalue_thr 0.05 --min_coverage 1 --logit --nthreads 4 --log_level debug'
+
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/nanocompore:v1.0.4 python3
+from nanocompore.SampCompDB import SampCompDB, jhelp
+import matplotlib.pyplot as pl
+db = SampCompDB (db_fn = "nanocompore_result/outSampComp.db", fasta_fn = "unmodified_all_all_all_rna_sequences_LYS.fasta")
+fig, ax = db.plot_pvalue ("ref")
+fig.savefig('plot_pvalue')
+fig, ax = db.plot_pvalue ("ref", palette="Set1")
+fig.savefig('plot_pvalue_set1')
+fig, ax = db.plot_signal ("ref", start=0, end=200)
+fig.savefig('plot_signal')
+fig, ax = db.plot_signal ("ref", start=0, end=200, kind="swarmplot")
+fig.savefig('plot_signal_swarmplot')
+fig, ax = db.plot_coverage ("ref")
+fig.savefig('plot_coverage')
+fig, ax = db.plot_kmers_stats ("ref")
+fig.savefig('plot_kmers_stats')
+#fig, ax = db.plot_position ("ref", pos=82)
+#fig.savefig('plot_position')
+
+
+=====================================
+====== Nanopolish
+=====================================
+
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data nanozoo/nanopolish:0.13.2--9069b5c bash -c 'nanopolish index -d experiment20231120_ncm5SU_long/fast5 experiment20231120_ncm5SU_long/basecalled.fastq'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'minimap2 -ax map-ont -t 8 unmodified_all_all_all_rna_sequences_LYS.fasta experiment20231120_ncm5SU_long/basecalled.fastq | samtools sort -o experiment20231120_ncm5SU_long/reads-ref.sorted.bam -T reads.tmp'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'samtools index experiment20231120_ncm5SU_long/reads-ref.sorted.bam'
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data tleonardi/minimap2:2.17 bash -c 'samtools quickcheck experiment20231120_ncm5SU_long/reads-ref.sorted.bam'
+
+docker run --rm -it -v /home/wiktor/nanocompore_pipeline/test_data:/home/wiktor/nanocompore_pipeline/test_data -w /home/wiktor/nanocompore_pipeline/test_data nanozoo/nanopolish:0.13.2--9069b5c bash -c 'nanopolish eventalign --reads experiment20231120_ncm5SU_long/basecalled.fastq --bam experiment20231120_ncm5SU_long/reads-ref.sorted.bam --genome unmodified_all_all_all_rna_sequences_LYS.fasta --scale-events > experiment20231120_ncm5SU_long/reads-ref.eventalign.txt'
+
+
 # Nanocompore pipeline
 This repo contains the code for running the [Nanocompore](https://github.com/tleonardi/nancompore) analysis workflow using [Nextflow](https://www.nextflow.io/).
 
